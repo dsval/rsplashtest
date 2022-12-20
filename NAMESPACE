@@ -1,0 +1,14 @@
+useDynLib(rsplashtest, .registration=TRUE)
+exportPattern("^[[:alpha:]]+")
+import(Rcpp)
+export(splash.point)
+export(splash.grid)
+export(unSWC)
+export(unSWC.grid)
+export(upslope_area)
+import(raster)
+import(topmodel)
+import(xts)
+
+
+
