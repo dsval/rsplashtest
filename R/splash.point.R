@@ -99,6 +99,7 @@ splash.point<-function(sw_in, tc, pn, lat,elev,slop=0,asp=0,soil_data,Au=0,resol
 	WP<-soil_info$WP*depth*1000
 	FC<-soil_info$FC*depth*1000
 	RES<-soil_info$RES*depth*1000
+	Wmax<-soil_info$theta_c*depth*1000
 	KWm<-soil_info$AWC*depth*1000
 	lambda<-1/soil_info$B
 	bub_press<-soil_info$bubbling_p
@@ -176,11 +177,17 @@ splash.point<-function(sw_in, tc, pn, lat,elev,slop=0,asp=0,soil_data,Au=0,resol
 	# KWm<-(soil_water$FC-(soil_water$WP/2))*(soil_data[6]*1000)
 	
 	#get relative soil moisture limitation from 0.0 (at WP) to 1.0 (at FC)
-	soil_lim<-(result$wn-WP)/KWm
+	# soil_lim<-(result$wn-WP)/KWm
+	# #adjust the boundaries, wn goes from ~WP to SAT
+	# soil_lim[soil_lim<0]<-0.0
+	# soil_lim[soil_lim>1]<-1.0
+	# result$sm_lim<-soil_lim	
+	soil_lim<-(result$wn-RES)/(Wmax-RES)
 	#adjust the boundaries, wn goes from ~WP to SAT
 	soil_lim[soil_lim<0]<-0.0
 	soil_lim[soil_lim>1]<-1.0
-	result$sm_lim<-soil_lim	
+	result$sm_lim<-soil_lim
+	#result$sm_lim<-result$aet/result$pet	
 	###########################################################################
 	###########################################################################
 	# 06. aggregate to monthly
@@ -252,23 +259,34 @@ soil_hydro<-function(sand, clay, OM, fgravel=0,bd=NA, ...) {
 	if(!is.numeric(sand)){
 		if(is.null(bd)){
 			bd<-(1.5 + (dp-1.5-1.10*(1 - clay))*(1-exp(-0.022*depth)))/(1+6.27*OM)
-		} 
+		}
 	}else{
 		bd<-ifelse(is.na(bd),(1.5 + (dp-1.5-1.10*(1 - clay))*(1-exp(-0.022*depth)))/(1+6.27*OM),bd)
 		
 		}
+	####error Fc calculations low bulk density. brute force low bd
+	bd[bd<0.81]<-0.81
 	########################################################################################
 	# 03. calc volumetric water contents at saturation, 33kPa (fc) and 1500kPa (wp) Balland et al. (2008)
 	######################################################################################## 
-	# volumetric water content at saturation [m3/m3]
+	# volumetric water content at saturation [m3/m3] first approx
 	sat<-1-(bd/dp)
+	##errors in the empirical fitting when bd<sat
+	#bd[bd>sat]<-(1.5 + (dp[bd>sat]-1.5-1.10*(1 - clay[bd>sat]))*(1-exp(-0.022*depth)))/(1+6.27*OM[bd>sat])
+	# if(!is.numeric(sand)){
+	# 	bd[bd>sat]<-(1.5 + (dp-1.5-1.10*(1 - clay))*(1-exp(-0.022*depth)))/(1+6.27*OM)
+	# }else{
+	# 	bd[bd>sat]<-(1.5 + (dp-1.5-1.10*(1 - clay))*(1-exp(-0.022*depth)))/(1+6.27*OM)
+	# }
+	#sat<-1-(bd/dp)
+	
 	# volumetric water content at 33kPa [m3/m3]
 	fc<-(sat/bd)*(0.4760944 + (0.9402962 - 0.4760944)*clay^0.5)*exp(-1*(0.05472678*sand - 0.01* OM)/(sat/bd))
 	##errors in the empirical fitting, switch to Saxton and Rawls (2006)
 	
-	FCinit<--0.251*sand+0.195*clay+0.011*OM+0.006*(sand*OM)-0.027*(clay*OM)+0.452*(sand*clay)+0.299
-	FC_fvol<-FCinit+(1.283*FCinit^2-0.374*FCinit-0.015)
-	fc[fc<0 | fc>sat]<-FC_fvol[fc<0 | fc>=sat]
+	# FCinit<--0.251*sand+0.195*clay+0.011*OM+0.006*(sand*OM)-0.027*(clay*OM)+0.452*(sand*clay)+0.299
+	# FC_fvol<-FCinit+(1.283*FCinit^2-0.374*FCinit-0.015)
+	# fc[fc<0 | fc>=sat]<-FC_fvol[fc<0 | fc>=sat]
 	##persistent errors, few pixels in siberia
 	#fc[fc<0]<-0.1
 	#fc[fc>sat]<-0.9*sat
@@ -280,8 +298,12 @@ soil_hydro<-function(sand, clay, OM, fgravel=0,bd=NA, ...) {
 	#fc[fc>sat]<-0.9*sat[fc>sat]
 	# volumetric water content at 1500kPa [m3/m3]
 	wp<- fc*(0.2018522 + (0.7809203 - 0.2018522)*clay^0.5) 
-	
-	
+	########################################################################################
+	# residual water content lm
+	######################################################################################## 
+	theta_r<-exp(-0.53219+0.12117*log(wp)+1.54406 *log(fc)-1.79696 *(clay))
+	##assume wp/2 as residual water contet if ptf fails
+	theta_r[theta_r>=wp]<-wp/2
 	########################################################################################
 	# 05. calc shape parameters water retention Brooks and Corey curve Saxton and Rawls (2006)
 	######################################################################################## 
@@ -289,6 +311,12 @@ soil_hydro<-function(sand, clay, OM, fgravel=0,bd=NA, ...) {
 	coef_B<-(log(1500)-log(33))/(log(fc)-log(wp))
 	coef_A<-exp(log(33)+coef_B*log(fc))
 	coef_lambda<-1/coef_B
+	########################################################################################
+	# 04. calc theta crit aasuming z 2m
+	######################################################################################## 
+	#coeff_c = 1000.0/(pw*G);
+	coeff_c = 1000.0/(997*9.80665);
+	theta_c<-(coeff_c*coef_A/2.0)^(1/(1+coef_B))
 	########################################################################################
 	# 04b. calc Saturated hydraulic conductivity Ksat [mm/hr] from calibrated Saxton (2006)
 	######################################################################################## 
@@ -299,6 +327,12 @@ soil_hydro<-function(sand, clay, OM, fgravel=0,bd=NA, ...) {
 	wp<-wp*(1-fgravel)
 	ksat <- 622.9916/(1 + exp(7.5623 -17.1442 * (sat-fc) -0.9141 * bd + 0.7076 * coef_lambda))
 	
+	########################################################################################
+	# 04. calc theta crit aasuming z 1m
+	######################################################################################## 
+	#coeff_c = 1000.0/(pw*G);
+	#coeff_c = 1000.0/(997*9.80665);
+	#theta_c<-(coeff_c*coef_A/1.0)^(1/(1+coef_B))
 	
 	#### Correction for peatlands very high SOM
 	########################################################################################
@@ -341,9 +375,9 @@ soil_hydro<-function(sand, clay, OM, fgravel=0,bd=NA, ...) {
 	clay<-clay*100
 	silt<-100-sand-clay
 	OM<-OM*100
-		
-	RES<--0.018+0.0009*sand+0.005*clay+0.029*sat -0.0002*clay^2-0.001*sand*sat-0.0002*clay^2*sat^2+0.0003*clay^2*sat -0.002*sat^2*clay
-	RES[RES<0]<-0.0
+	# 	
+	# RES<--0.018+0.0009*sand+0.005*clay+0.029*sat -0.0002*clay^2-0.001*sand*sat-0.0002*clay^2*sat^2+0.0003*clay^2*sat -0.002*sat^2*clay
+	# RES[RES<0]<-0.0
 	# parameters for van Genutchen eqn
 	topsoil<-1
 	
@@ -362,7 +396,8 @@ soil_hydro<-function(sand, clay, OM, fgravel=0,bd=NA, ...) {
 	results$Ksat<-ksat
 	results$A<-coef_A
 	results$B<-coef_B
-	results$RES<-RES*(1-fgravel)
+	results$theta_c<-theta_c
+	results$RES<-theta_r*(1-fgravel)
 	results$bubbling_p<-bubbling_p
 	results$VG_alpha<-alpha
 	results$VG_n<-n
@@ -430,10 +465,12 @@ month2day_rain<-function(pn_monthly,ndaypmonth){
 	if(!is.na(mean_mean) & mean_mean>0){
 		Y<-log(mean_mean/geo_mean)
 		
-		if(Y>=0.0 & Y < 0.5772){
+		if(Y>0.0 & Y < 0.5772){
 			alph<-(0.5000876 +0.16488552*Y-0.0544274*Y^2)/Y
-		}else{
+		}else if (Y>=0.5772){
 			alph<-(8.898919+9.059950*Y+0.9775373*Y^2)/(Y*(17.79728+11.968477*Y+Y^2))
+		}else{
+			alph<-1
 		}
 		
 		bet<-mean_mean/alph

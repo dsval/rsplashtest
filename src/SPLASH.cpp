@@ -183,8 +183,8 @@ void SPLASH::quick_run(int n, int y, double wn, double sw_in, double tc,
     //bubbling pressure/capillarity fringe (mm)
     double bub_press = soil_info[6];
     //residual water content, test as WP?
-    double RES = WP/2;
-    //double RES = soil_info[7];
+    //double RES = WP/2;
+    double RES = soil_info[7];
     //upslope area
     double Au = soil_info[8];
     //Pixel Area
@@ -267,7 +267,7 @@ void SPLASH::quick_run(int n, int y, double wn, double sw_in, double tc,
     
 
     // when the soil depth exeeds 2m:
-     if (depth>=2.0){
+     if (depth>=6.0){
         double RES_z = theta_r * z_uns;
         sw = Global::Cw*((w_z-RES_z)/(Wmax-RES_z));
     } else{
@@ -842,8 +842,8 @@ void SPLASH::run_one_day(int n, int y, double wn, double sw_in, double tc,
     //bubbling pressure/capillarity fringe (mm)
     double bub_press = soil_info[6];
     //residual water content, test as WP?
-    double RES = WP/2;
-    //double RES = soil_info[7];
+    //double RES = WP/2;
+    double RES = soil_info[7];
     //upslope area
     double Au = soil_info[8];
     //Pixel Area
@@ -918,7 +918,7 @@ void SPLASH::run_one_day(int n, int y, double wn, double sw_in, double tc,
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
     // when the soil depth exeeds 2m:
-     if (depth>=2.0){
+     if (depth>=6.0){
         double RES_z = theta_r * z_uns;
         sw = Global::Cw*((w_z-RES_z)/(Wmax-RES_z));
     } else{
@@ -1385,8 +1385,8 @@ List SPLASH::spin_up(int n, int y, vector<double> &sw_in, vector <double> &tair,
     //bubbling pressure/capillarity fringe (mm)
     double bub_press = soil_info[6];
     //residual water content, test as WP?
-    double RES = WP/2;
-    //double RES = soil_info[7];
+    //double RES = WP/2;
+    double RES = soil_info[7];
 
     double theta_s = SAT/(depth *1000.0);
     double theta_r = RES/(depth *1000.0);

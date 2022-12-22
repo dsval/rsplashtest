@@ -68,7 +68,10 @@ unSWC<-function(soil_data,uns_depth,wn){
 	#psi_m<-soil_info$A*(theta_i)^(-1*soil_info$B)
 	#psi_m<-as.numeric(psi_m)*-101.97162129779
 	uns_wn<-UnsWater(psi_m,uns_depth,theta_r,theta_s,bub_press,lambda,soil_data[6])
-	uns_wn<-mapply(FUN=xts,uns_wn,MoreArgs = list(order.by=time(wn)),SIMPLIFY = F)
+	if(is.xts(wn)){
+		uns_wn<-mapply(FUN=xts,uns_wn,MoreArgs = list(order.by=time(wn)),SIMPLIFY = F)
+	}
+	
 	uns_theta<-(uns_wn[[1]]/(uns_depth*1000))
 	#### correct swc for stoniness at the top
 	uns_wn[[1]]<-uns_wn[[1]]*(1-(soil_data[4]/100))
