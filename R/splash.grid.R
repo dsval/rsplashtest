@@ -273,7 +273,7 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 	# 02. create the functions to send to the workers, split the data in chunks
 	###############################################################################################	
 	clFun <- function(i) {
-		swrow<- split(raster::getValues(sw_in, bs$row[i], c),1:(ncol(elev)*bs$nrows[i]))
+		swrow<- split(raster::getValues(sw_in, bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
 		tcrow<-split(raster::getValues(tc,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
 		pnrow<-split(raster::getValues(pn,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
 		elevrow<-raster::getValues(elev,bs$row[i], bs$nrows[i])
