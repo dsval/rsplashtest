@@ -59,10 +59,10 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 		# rsqv<-function(x,y){summary(lm(y~x,na.action=))$r.squared}
 		for (i in 1:bs$n) {
 			# i=178
-			# xmat <- getValues(x, row=bs$row[i], nrows=bs$nrows[i] )
-			# ymat <- getValues(y, row=bs$row[i], nrows=bs$nrows[i] )
+			# xmat <- raster::getValues(x, row=bs$row[i], nrows=bs$nrows[i] )
+			# ymat <- raster::getValues(y, row=bs$row[i], nrows=bs$nrows[i] )
 			xncells<-cellFromRow(x,bs$row[i]:(bs$row[i]+ bs$nrows[i]-1))
-			#xmat<-getValues(x,bs$row[i], bs$nrows[i])
+			#xmat<-raster::getValues(x,bs$row[i], bs$nrows[i])
 			xydata<-xyFromCell(x, xncells)
 			
 			# write the chunk of results, bs$row[i] is putting the results in the correct rows
@@ -258,7 +258,7 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 	cl <- getCluster()
 	nodes <- length(cl)
 	########################### set the size of the blocks
-	
+	message('Using cluster with ', nodes, ' nodes')
 	if(nodes>1){
 		bs <- blockSize(sw_in, minblocks=nodes*2)
 	}else{
@@ -268,21 +268,21 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 	parallel:::clusterExport(cl, c("sw_in","tc","pn","elev","lat","terraines",'soil','resolution','Au','ztime','bs','splash.point','sim.control'),envir=environment()) 
 	pb <- pbCreate(bs$n)
 	pb <- txtProgressBar(min=1,max = max(bs$n,2), style = 3)
-	cat("computing...","\n")
+	#cat("computing...","\n")
 	###############################################################################################
 	# 02. create the functions to send to the workers, split the data in chunks
 	###############################################################################################	
 	clFun <- function(i) {
-		swrow<- split(getValues(sw_in, bs$row[i], c),1:(ncol(elev)*bs$nrows[i]))
-		tcrow<-split(getValues(tc,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
-		pnrow<-split(getValues(pn,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
-		elevrow<-getValues(elev,bs$row[i], bs$nrows[i])
-		sloprow<-getValues(terraines[[1]],bs$row[i], bs$nrows[i])
-		asprow<-getValues(terraines[[2]],bs$row[i], bs$nrows[i])
-		latrow<-getValues(lat,bs$row[i], bs$nrows[i])
-		soilrow<-split(getValues(soil,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
-		Aurow<-split(getValues(Au,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
-		resrow<-getValues(resolution,bs$row[i], bs$nrows[i])
+		swrow<- split(raster::getValues(sw_in, bs$row[i], c),1:(ncol(elev)*bs$nrows[i]))
+		tcrow<-split(raster::getValues(tc,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
+		pnrow<-split(raster::getValues(pn,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
+		elevrow<-raster::getValues(elev,bs$row[i], bs$nrows[i])
+		sloprow<-raster::getValues(terraines[[1]],bs$row[i], bs$nrows[i])
+		asprow<-raster::getValues(terraines[[2]],bs$row[i], bs$nrows[i])
+		latrow<-raster::getValues(lat,bs$row[i], bs$nrows[i])
+		soilrow<-split(raster::getValues(soil,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
+		Aurow<-split(raster::getValues(Au,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
+		resrow<-raster::getValues(resolution,bs$row[i], bs$nrows[i])
 		# do calculations
 		
 		
