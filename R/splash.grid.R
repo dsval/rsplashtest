@@ -80,8 +80,8 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 		Au<-upslope_areav2(elev, type,tmpdir)
 		# 1.2.2 get latitude from the high res dem
 		lat<-getlatitude(elev, filename='lat.grd')
-		system("gdaldem slope -s 111120 rawdem.tif slope_deg.tif")
-		system("gdaldem aspect -zero_for_flat rawdem.tif aspect_deg.tif")
+		system("gdaldem slope -s 111120 -compute_edges rawdem.tif slope_deg.tif")
+		system("gdaldem aspect -zero_for_flat -compute_edges rawdem.tif aspect_deg.tif")
 		terraines<-raster::stack(list(slope='slope_deg.tif',aspect='aspect_deg.tif'))
 		# get resolution in m2
 		resolution<-area(elev,filename='area.grd',overwrite=T)
@@ -185,32 +185,32 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 		
 		
 		# actual soil moisture
-		sm<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"swc",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="wm", varunit="mm",	longname='Soil water content', xname="lon", yname="lat", zname="time")
+		sm<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"swc",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="wm", varunit="mm",	longname='Soil water content', xname="lon", yname="lat", zname="time")
 		sm<-setZ(sm,ztime_out)
 		
-		ro<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"ro",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="ro", varunit="mm",	longname='surface runoff', xname="lon", yname="lat", zname="time")
+		ro<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"ro",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="ro", varunit="mm",	longname='surface runoff', xname="lon", yname="lat", zname="time")
 		ro<-setZ(ro,ztime_out)
 		
-		pet<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"pet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="pet", varunit="mm",	longname='potential evapotranspiration', xname="lon", yname="lat", zname="time")
+		pet<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"pet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="pet", varunit="mm",	longname='potential evapotranspiration', xname="lon", yname="lat", zname="time")
 		pet<-setZ(pet,ztime_out)
 		
-		aet<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"aet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="aet", varunit="mm",	longname='actual evapotranspiration', xname="lon", yname="lat", zname="time")
+		aet<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"aet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="aet", varunit="mm",	longname='actual evapotranspiration', xname="lon", yname="lat", zname="time")
 		aet<-setZ(aet,ztime_out)
 		
 		
-		swe<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"swe",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="swe", varunit="mm",	longname='snow water equivalent', xname="lon", yname="lat", zname="time")
+		swe<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"swe",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="swe", varunit="mm",	longname='snow water equivalent', xname="lon", yname="lat", zname="time")
 		swe<-setZ(swe,ztime_out)
 		
-		cond<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"cond",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="cond", varunit="mm",	longname='condensation', xname="lon", yname="lat", zname="time")
+		cond<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"cond",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="cond", varunit="mm",	longname='condensation', xname="lon", yname="lat", zname="time")
 		cond<-setZ(cond,ztime_out)
 		
-		bflow<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"bflow",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="bflow", varunit="mm",	longname='drainage', xname="lon", yname="lat", zname="time")
+		bflow<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"bflow",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="bflow", varunit="mm",	longname='drainage', xname="lon", yname="lat", zname="time")
 		bflow<-setZ(bflow,ztime_out)
 		
-		netrad<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"netrad",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="netrad", varunit="MJ",	longname='daytime net radiation', xname="lon", yname="lat", zname="time")
+		netrad<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"netrad",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="netrad", varunit="MJ",	longname='daytime net radiation', xname="lon", yname="lat", zname="time")
 		netrad<-setZ(netrad,ztime_out)
 		
-		sm_lim<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2_',"sm_lim",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="sm_lim", varunit="mm",	longname='fraction of available water content', xname="lon", yname="lat", zname="time")
+		sm_lim<-brick(elev, values=FALSE, nl=nl,filename=paste0(outdir,"/",'SPLASH_v2.0_',"sm_lim",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="sm_lim", varunit="mm",	longname='fraction of available water content', xname="lon", yname="lat", zname="time")
 		sm_lim<-setZ(sm_lim,ztime_out)
 		
 		
@@ -260,7 +260,7 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 	########################### set the size of the blocks
 	
 	if(nodes>1){
-		bs <- blockSize(sw_in, minblocks=nodes*4)
+		bs <- blockSize(sw_in, minblocks=nodes*2)
 	}else{
 		bs <- blockSize(sw_in, minblocks=nodes*10)
 	}
@@ -268,11 +268,12 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 	parallel:::clusterExport(cl, c("sw_in","tc","pn","elev","lat","terraines",'soil','resolution','Au','ztime','bs','splash.point','sim.control'),envir=environment()) 
 	pb <- pbCreate(bs$n)
 	pb <- txtProgressBar(min=1,max = max(bs$n,2), style = 3)
+	cat("computing...","\n")
 	###############################################################################################
 	# 02. create the functions to send to the workers, split the data in chunks
 	###############################################################################################	
 	clFun <- function(i) {
-		swrow<- split(getValues(sw_in, bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
+		swrow<- split(getValues(sw_in, bs$row[i], c),1:(ncol(elev)*bs$nrows[i]))
 		tcrow<-split(getValues(tc,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
 		pnrow<-split(getValues(pn,bs$row[i], bs$nrows[i]),1:(ncol(elev)*bs$nrows[i]))
 		elevrow<-getValues(elev,bs$row[i], bs$nrows[i])
@@ -315,23 +316,23 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 	if(!sim.control$inmem){
 		
 		
-		sm<-writeStart(sm,filename=paste0(outdir,"/",'SPLASH_v2_',"sm",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="wm", varunit="mm",	longname='Soil water content', xname="lon", yname="lat", zname="time")
+		sm<-writeStart(sm,filename=paste0(outdir,"/",'SPLASH_v2.0_',"sm",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="wm", varunit="mm",	longname='Soil water content', xname="lon", yname="lat", zname="time")
 		
-		ro<-writeStart(ro,filename=paste0(outdir,"/",'SPLASH_v2_',"ro",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="ro", varunit="mm",	longname='surface runoff', xname="lon", yname="lat", zname="time")
+		ro<-writeStart(ro,filename=paste0(outdir,"/",'SPLASH_v2.0_',"ro",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="ro", varunit="mm",	longname='surface runoff', xname="lon", yname="lat", zname="time")
 		
-		pet<-writeStart(pet,filename=paste0(outdir,"/",'SPLASH_v2_',"pet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="pet", varunit="mm",	longname='potential evapotranspiration', xname="lon", yname="lat", zname="time")
+		pet<-writeStart(pet,filename=paste0(outdir,"/",'SPLASH_v2.0_',"pet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="pet", varunit="mm",	longname='potential evapotranspiration', xname="lon", yname="lat", zname="time")
 		
-		aet<-writeStart(aet,filename=paste0(outdir,"/",'SPLASH_v2_',"aet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="aet", varunit="mm",	longname='actual evapotranspiration', xname="lon", yname="lat", zname="time")
+		aet<-writeStart(aet,filename=paste0(outdir,"/",'SPLASH_v2.0_',"aet",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="aet", varunit="mm",	longname='actual evapotranspiration', xname="lon", yname="lat", zname="time")
 		
-		swe<-writeStart(swe,filename=paste0(outdir,"/",'SPLASH_v2_',"swe",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="swe", varunit="mm",	longname='snow water equivalent', xname="lon", yname="lat", zname="time")
+		swe<-writeStart(swe,filename=paste0(outdir,"/",'SPLASH_v2.0_',"swe",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="swe", varunit="mm",	longname='snow water equivalent', xname="lon", yname="lat", zname="time")
 		
-		cond<-writeStart(cond,filename=paste0(outdir,"/",'SPLASH_v2_',"cond",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="cond", varunit="mm",	longname='condensation', xname="lon", yname="lat", zname="time")
+		cond<-writeStart(cond,filename=paste0(outdir,"/",'SPLASH_v2.0_',"cond",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="cond", varunit="mm",	longname='condensation', xname="lon", yname="lat", zname="time")
 		
-		bflow<-writeStart(bflow,filename=paste0(outdir,"/",'SPLASH_v2_',"bflow",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="bflow", varunit="mm",	longname='drainage', xname="lon", yname="lat", zname="time")
+		bflow<-writeStart(bflow,filename=paste0(outdir,"/",'SPLASH_v2.0_',"bflow",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="bflow", varunit="mm",	longname='drainage', xname="lon", yname="lat", zname="time")
 		
-		netrad<-writeStart(netrad,filename=paste0(outdir,"/",'SPLASH_v2_',"netrad",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="netrad", varunit="MJ",	longname='daytime net radiation', xname="lon", yname="lat", zname="time")
+		netrad<-writeStart(netrad,filename=paste0(outdir,"/",'SPLASH_v2.0_',"netrad",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="netrad", varunit="MJ",	longname='daytime net radiation', xname="lon", yname="lat", zname="time")
 		
-		sm_lim<-writeStart(sm_lim,filename=paste0(outdir,"/",'SPLASH_v2_',"sm_lim",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="sm_lim", varunit="mm",	longname='fraction of available water content', xname="lon", yname="lat", zname="time")
+		sm_lim<-writeStart(sm_lim,filename=paste0(outdir,"/",'SPLASH_v2.0_',"sm_lim",'_',time_text,'_',y[1],"-",y[length(y)],".nc"),format="CDF",overwrite=TRUE,varname="sm_lim", varunit="mm",	longname='fraction of available water content', xname="lon", yname="lat", zname="time")
 		
 		
 		
