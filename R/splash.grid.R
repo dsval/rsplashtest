@@ -103,6 +103,8 @@ splash.grid<-function(sw_in, tc, pn, elev, soil, outdir=getwd(),tmpdir=dirname(r
 		lat[!is.na(lat)]<-lat.data[,2]
 		rm(lat.data)
 		terraines<-terrain(elev, opt=c('slope', 'aspect'), unit='degrees')
+		##fix slopes NA as flats
+		terraines[is.na(terraines) & !is.na(elev)]<-0
 		cat("done!","\n")
 		gc()
 	}
